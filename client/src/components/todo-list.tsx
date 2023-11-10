@@ -1,34 +1,25 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from "axios";
-import { TodoForm } from "./todo-form";
+import { useTodoStore } from "../store";
+import { Todo } from "../types";
+import { format } from "date-fns";
 
-export interface TodoProps {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: string;
-  ordinal: number;
-}
-
-export const TodoList = () => {
-  const [todos, setTodos] = useState<TodoProps[]>([]);
-  const [editTodo, setEditTodo] = useState<TodoProps | null>(null);
+const TodoList = () => {
+  const todoStore = useTodoStore();
+  const { todos, setTodos, setEditTodo } = todoStore;
 
   useEffect(() => {
-    async function fetchTodos() {
+    const fetchTodos = async () => {
       try {
         const response = await axios.get("http://localhost:4000/todos");
-        const getTodo = response.data;
-
-        setTodos(getTodo);
+        setTodos(response.data);
       } catch (error) {
         console.error(error);
       }
-    }
+    };
 
     fetchTodos();
-  }, []);
+  }, [setTodos]);
 
   const handleDeleteTodo = async (todoId: string) => {
     try {
@@ -55,38 +46,29 @@ export const TodoList = () => {
     }
   };
 
-  const handleEditTodo = (todo: TodoProps) => {
+  const handleEditTodo = (todo: Todo) => {
     setEditTodo(todo);
-  };
-
-  const handleCancelEdit = () => {
-    setEditTodo(null);
   };
 
   return (
     <div>
-      {editTodo ? (
-        <TodoForm todo={editTodo} onCancel={handleCancelEdit} />
-      ) : (
-        <TodoForm />
-      )}
-      {todos.map((todo) => (
-        <Fragment key={todo._id}>
-          <div>
-            {todo.ordinal} - {todo.title}
-          </div>
-          <div>{todo.description}</div>
-          <div>Due Date: {new Date(todo.dueDate).toLocaleDateString()}</div>
-          <div>Status: {todo.status}</div>
+      <h2>Todo List</h2>
+      {todos.map((todo: Todo) => (
+        <div key={todo._id}>
+          <p>Title: {todo.title}</p>
+          <p>Ordinal: {todo.ordinal}</p>
+          <p>Description: {todo.description}</p>
+          <p>Due Date: {format(new Date(todo.dueDate), "dd-MM-yyyy")}</p>
+          <p>Status: {todo.status}</p>
           <button onClick={() => handleDeleteTodo(todo._id)}>Delete</button>
           <button onClick={() => handleToggleTodo(todo._id, todo.status)}>
-            {todo.status === "pending"
-              ? "Mark as Completed"
-              : "Mark as Pending"}
+            Toggle Status
           </button>
           <button onClick={() => handleEditTodo(todo)}>Edit</button>
-        </Fragment>
+        </div>
       ))}
     </div>
   );
 };
+
+export default TodoList;

@@ -1,34 +1,37 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { format } from "date-fns";
-import { Todo } from "../types";
+
+import { useTodoStore } from "../store";
 
 interface TodoFormProps {
-  todo?: Todo | null;
   onCancel?: () => void;
 }
 
-export const TodoForm = ({ todo = null, onCancel }: TodoFormProps) => {
-  const [title, setTitle] = useState(todo ? todo.title : "");
-  const [description, setDescription] = useState(todo ? todo.description : "");
-  const [dueDate, setDueDate] = useState(todo ? todo.dueDate : "");
-  const [status, setStatus] = useState(todo ? todo.status : "pending");
+const TodoForm: React.FC<TodoFormProps> = ({ onCancel }) => {
+  const todoStore = useTodoStore();
+  const { editTodo, setEditTodo } = todoStore;
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState("pending");
 
   useEffect(() => {
-    if (todo) {
-      setTitle(todo.title);
-      setDescription(todo.description);
-      setDueDate(format(new Date(todo.dueDate), "yyyy-MM-dd"));
+    if (editTodo) {
+      setTitle(editTodo.title);
+      setDescription(editTodo.description);
+      setDueDate(editTodo.dueDate);
+      setStatus(editTodo.status);
     }
-  }, [todo]);
+  }, [editTodo]);
 
   const handleSubmit = async () => {
-    if (todo) {
+    if (editTodo) {
       try {
-        await axios.put(`http://localhost:4000/todos/${todo._id}`, {
+        await axios.put(`http://localhost:4000/todos/${editTodo._id}`, {
           title,
           description,
-          dueDate,
+          dueDate: new Date(dueDate).toISOString(),
           status,
         });
       } catch (error) {
@@ -60,53 +63,59 @@ export const TodoForm = ({ todo = null, onCancel }: TodoFormProps) => {
     setTitle("");
     setDescription("");
     setDueDate("");
+    setEditTodo(null); // Reset the editTodo state in the Zustand store
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="title">Title</label>
-      <br />
-      <input
-        required
-        id="title"
-        type="text"
-        value={title}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setTitle(e.target.value);
-        }}
-      />
-      <br />
-      <br />
-      <label htmlFor="description">Description</label>
-      <br />
-      <textarea
-        required
-        id="description"
-        value={description}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-          setDescription(e.target.value);
-        }}
-      />{" "}
-      <br />
-      <label htmlFor="dueDate">Due Date</label>
-      <br />
-      <input
-        id="dueDate"
-        type="date"
-        value={dueDate}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          setDueDate(e.target.value);
-        }}
-      />
-      <br />
-      <br />
-      <br />
-      <button>{todo ? "Edit Todo" : "Add Todo"}</button>
-      {onCancel && (
-        <button type="button" onClick={handleCancel}>
-          Cancel
-        </button>
-      )}
-    </form>
+    <div>
+      <h2>{editTodo ? "Edit Todo" : "Add Todo"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="title">Title:</label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="description">Description:</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          ></textarea>
+        </div>
+        <div>
+          <label htmlFor="dueDate">Due Date:</label>
+          <input
+            type="date"
+            id="dueDate"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="status">Status:</label>
+          <select
+            id="status"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div>
+          <button type="submit">{editTodo ? "Update" : "Add"}</button>
+          <button type="button" onClick={handleCancel}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
+
+export default TodoForm;
