@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { format } from "date-fns";
-
-interface Todo {
-  _id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: string;
-}
+import { Todo } from "../types";
 
 interface TodoFormProps {
   todo?: Todo | null;
