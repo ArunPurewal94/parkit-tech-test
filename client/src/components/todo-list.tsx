@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 const TodoList = () => {
   const todoStore = useTodoStore();
-  const { todos, setTodos, setEditTodo } = todoStore;
+  const { todos, setTodos, setEditTodo, showCompleted } = todoStore;
 
   useEffect(() => {
     const fetchTodos = async () => {
@@ -50,23 +50,41 @@ const TodoList = () => {
     setEditTodo(todo);
   };
 
+  const pendingTodos = todos.filter((todo) => todo.status === "pending");
+  const completedTodos = todos.filter((todo) => todo.status === "completed");
+
+  const renderTodos = (todos: Todo[]) =>
+    todos.map((todo: Todo) => (
+      <div className="p-5 border shadow-xl m-5 rounded" key={todo._id}>
+        <p>Title: {todo.title}</p>
+        <p>Ordinal: {todo.ordinal}</p>
+        <p>Description: {todo.description}</p>
+        <p>Due Date: {format(new Date(todo.dueDate), "dd-MM-yyyy")}</p>
+        <p>Status: {todo.status}</p>
+        <button onClick={() => handleDeleteTodo(todo._id)}>Delete</button>
+        <button onClick={() => handleToggleTodo(todo._id, todo.status)}>
+          {todo.status === "pending" ? "Mark as completed" : "Mark as pending"}
+        </button>
+        {todo.status === "pending" && (
+          <button onClick={() => handleEditTodo(todo)}>Edit</button>
+        )}
+      </div>
+    ));
+
   return (
     <div>
-      <h2>Todo List</h2>
-      {todos.map((todo: Todo) => (
-        <div key={todo._id}>
-          <p>Title: {todo.title}</p>
-          <p>Ordinal: {todo.ordinal}</p>
-          <p>Description: {todo.description}</p>
-          <p>Due Date: {format(new Date(todo.dueDate), "dd-MM-yyyy")}</p>
-          <p>Status: {todo.status}</p>
-          <button onClick={() => handleDeleteTodo(todo._id)}>Delete</button>
-          <button onClick={() => handleToggleTodo(todo._id, todo.status)}>
-            Toggle Status
-          </button>
-          <button onClick={() => handleEditTodo(todo)}>Edit</button>
-        </div>
-      ))}
+      {!showCompleted && (
+        <>
+          <h2 className="text-center text-xl font-semibold">Pending Todos</h2>
+          {renderTodos(pendingTodos)}
+        </>
+      )}
+      {showCompleted && (
+        <>
+          <h2 className="text-center text-xl font-semibold">Completed Todos</h2>
+          {renderTodos(completedTodos)}
+        </>
+      )}
     </div>
   );
 };

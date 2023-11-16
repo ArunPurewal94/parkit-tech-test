@@ -3,6 +3,6 @@ export interface Todo {
   title: string;
   description: string;
   dueDate: string;
-  status: string;
+  status: "pending" | "completed";
   ordinal?: number;
 }

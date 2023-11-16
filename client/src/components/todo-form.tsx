@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
 import axios from "axios";
 
 import { useTodoStore } from "../store";
@@ -20,7 +21,10 @@ const TodoForm: React.FC<TodoFormProps> = ({ onCancel }) => {
     if (editTodo) {
       setTitle(editTodo.title);
       setDescription(editTodo.description);
-      setDueDate(editTodo.dueDate);
+
+      const date = new Date(editTodo.dueDate);
+
+      setDueDate(format(date, "yyyy-MM-dd"));
       setStatus(editTodo.status);
     }
   }, [editTodo]);
@@ -63,16 +67,20 @@ const TodoForm: React.FC<TodoFormProps> = ({ onCancel }) => {
     setTitle("");
     setDescription("");
     setDueDate("");
-    setEditTodo(null); // Reset the editTodo state in the Zustand store
+    setEditTodo(null);
   };
 
   return (
-    <div>
-      <h2>{editTodo ? "Edit Todo" : "Add Todo"}</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="w-full">
+      <h2 className="text-xl font-semibold mx-5">
+        {editTodo ? "Edit Todo" : "Add Todo"}
+      </h2>
+      <form className="flex flex-col p-5 space-y-5" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="title">Title:</label>
           <input
+            required
+            className="w-full border rounded mt-2 p-2"
             type="text"
             id="title"
             value={title}
@@ -82,6 +90,8 @@ const TodoForm: React.FC<TodoFormProps> = ({ onCancel }) => {
         <div>
           <label htmlFor="description">Description:</label>
           <textarea
+            required
+            className="w-full border rounded mt-2 p-2"
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -90,26 +100,26 @@ const TodoForm: React.FC<TodoFormProps> = ({ onCancel }) => {
         <div>
           <label htmlFor="dueDate">Due Date:</label>
           <input
+            className="w-full border rounded mt-2 p-2"
             type="date"
             id="dueDate"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
-        <div>
-          <label htmlFor="status">Status:</label>
-          <select
-            id="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+
+        <div className="flex items-center gap-5 mx-auto">
+          <button
+            className="py-2 px-6 bg-indigo-500 rounded text-white"
+            type="submit"
           >
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-        <div>
-          <button type="submit">{editTodo ? "Update" : "Add"}</button>
-          <button type="button" onClick={handleCancel}>
+            {editTodo ? "Update" : "Add"}
+          </button>
+          <button
+            className="py-2 px-4 bg-red-500 rounded text-white"
+            type="button"
+            onClick={handleCancel}
+          >
             Cancel
           </button>
         </div>
