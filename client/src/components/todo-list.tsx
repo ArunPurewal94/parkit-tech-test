@@ -55,19 +55,42 @@ const TodoList = () => {
 
   const renderTodos = (todos: Todo[]) =>
     todos.map((todo: Todo) => (
-      <div className="p-5 border shadow-xl m-5 rounded" key={todo._id}>
-        <p>Title: {todo.title}</p>
-        <p>Ordinal: {todo.ordinal}</p>
-        <p>Description: {todo.description}</p>
-        <p>Due Date: {format(new Date(todo.dueDate), "dd-MM-yyyy")}</p>
-        <p>Status: {todo.status}</p>
-        <button onClick={() => handleDeleteTodo(todo._id)}>Delete</button>
-        <button onClick={() => handleToggleTodo(todo._id, todo.status)}>
-          {todo.status === "pending" ? "Mark as completed" : "Mark as pending"}
-        </button>
-        {todo.status === "pending" && (
-          <button onClick={() => handleEditTodo(todo)}>Edit</button>
-        )}
+      <div
+        className="w-full  bg-white border border-gray-200 rounded-lg shadow p-5 mt-5 gap-3"
+        key={todo._id}
+      >
+        <div className="flex flex-col items-center pb-10">
+          <h5 className="mb-1 text-xl font-medium text-gray-900">
+            {todo.ordinal} - {todo.title}
+          </h5>
+          <span className="text-sm text-gray-500">
+            Due Date: {format(new Date(todo.dueDate), "dd-MM-yyyy")}
+          </span>
+          <div className="flex mt-4 md:mt-6">
+            <button
+              onClick={() => handleDeleteTodo(todo._id)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300"
+            >
+              Delete
+            </button>
+            <button
+              onClick={() => handleToggleTodo(todo._id, todo.status)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-green-700 rounded-lg hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 ms-3"
+            >
+              {todo.status === "pending"
+                ? "Mark as completed"
+                : "Mark as pending"}
+            </button>
+            {todo.status === "pending" && (
+              <button
+                onClick={() => handleEditTodo(todo)}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 ms-3"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     ));
 
@@ -76,13 +99,17 @@ const TodoList = () => {
       {!showCompleted && (
         <>
           <h2 className="text-center text-xl font-semibold">Pending Todos</h2>
-          {renderTodos(pendingTodos)}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 p-3 w-full gap-4">
+            {renderTodos(pendingTodos)}
+          </div>
         </>
       )}
       {showCompleted && (
         <>
           <h2 className="text-center text-xl font-semibold">Completed Todos</h2>
-          {renderTodos(completedTodos)}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 p-3 w-full gap-4">
+            {renderTodos(completedTodos)}
+          </div>
         </>
       )}
     </div>
